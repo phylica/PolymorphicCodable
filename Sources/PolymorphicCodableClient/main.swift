@@ -18,3 +18,9 @@ struct Flower: Plant
     var petals: Int
     var persistence: Bool
 }
+
+struct Garden: Codable
+{
+    var name: String
+    @CodableField var plant: Plant
+}

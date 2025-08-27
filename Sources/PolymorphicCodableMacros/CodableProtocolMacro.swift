@@ -63,7 +63,7 @@ public struct CodableProtocol: PeerMacro {
         
         return [
           """
-          enum \(protocolDeclaration.name)PolymorphicEnum {
+          enum \(protocolDeclaration.name)PolymorphicEnum: Codable {
           \(raw: cases)
           
           \(raw: initializer)
@@ -71,11 +71,4 @@ public struct CodableProtocol: PeerMacro {
           """
         ]
     }
-}
-
-@main
-struct PolymorphicCodablePlugin: CompilerPlugin {
-    let providingMacros: [Macro.Type] = [
-        CodableProtocol.self,
-    ]
 }
