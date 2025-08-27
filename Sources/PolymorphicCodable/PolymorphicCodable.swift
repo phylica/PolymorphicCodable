@@ -5,7 +5,7 @@ public macro CodableProtocol(_ children: Any.Type...) = #externalMacro(
 )
 
 @attached(accessor)
-@attached(peer, names: suffixed(PolymorphicEnum))
+@attached(peer, names: suffixed(PolymorphicEnum), named(CodingKeys))
 public macro CodableField() = #externalMacro(
     module: "PolymorphicCodableMacros",
     type: "CodableField"

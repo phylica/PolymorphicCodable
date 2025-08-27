@@ -12,17 +12,18 @@ public struct CodableField: AccessorMacro, PeerMacro {
         {
             throw PolymorphicCodableError.codableFieldNotAppliedOnField
         }
-
+        
+        guard let variableName = variableDeclaration.bindings.first?.pattern.description,
+              let variableType = variableDeclaration.bindings.first?.typeAnnotation?.type else
+        {
+            throw PolymorphicCodableError.codableFieldNotCorrectlyDeclared
+        }
+        
         
         return [
           """
             get{
-             switch plantPolymorphicEnum {
-                 case .tree(let tree):
-                     return tree
-                 case .flower(let flower):
-                     return flower
-             }
+             return \(raw: variableName)PolymorphicEnum.value()
             }
           """
         ]
@@ -36,11 +37,15 @@ public struct CodableField: AccessorMacro, PeerMacro {
             throw PolymorphicCodableError.codableFieldNotAppliedOnField
         }
         
+        guard let variableName = variableDeclaration.bindings.first?.pattern.description,
+              let variableType = variableDeclaration.bindings.first?.typeAnnotation?.type.description else
+        {
+            throw PolymorphicCodableError.codableFieldNotCorrectlyDeclared
+        }
         
         return [
           """
-            
-            private var plantPolymorphicEnum: PlantPolymorphicEnum
+            private var \(raw: variableName)PolymorphicEnum: \(raw: variableType)PolymorphicEnum
           """
         ]
     }

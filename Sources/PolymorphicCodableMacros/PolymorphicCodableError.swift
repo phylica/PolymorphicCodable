@@ -1,6 +1,7 @@
 public enum PolymorphicCodableError: Error {
     case codableProtocolNotAppliedOnProtocol
-    case codableFieldNotAppliedOnField
     case codableProtocolMissingChildren
+    case codableFieldNotAppliedOnField
+    case codableFieldNotCorrectlyDeclared
     case wrongArguments
 }

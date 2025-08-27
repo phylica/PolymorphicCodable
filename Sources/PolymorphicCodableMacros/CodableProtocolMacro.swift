@@ -60,6 +60,24 @@ public struct CodableProtocol: PeerMacro {
           }
           """
         
+        var valueCases : String = ""
+        for t in types{
+            valueCases = valueCases +
+            """
+               case .\(t.lowercasingFirstLetter())(let \(t.lowercasingFirstLetter())):
+                    return \(t.lowercasingFirstLetter())
+            """
+        }
+        
+        let valueGetter =
+        """
+        func value() -> \(generic) {
+            switch self {
+                \(valueCases)
+            }
+        }
+        """
+        
         
         return [
           """
@@ -67,6 +85,8 @@ public struct CodableProtocol: PeerMacro {
           \(raw: cases)
           
           \(raw: initializer)
+          
+          \(raw: valueGetter)
           }
           """
         ]
