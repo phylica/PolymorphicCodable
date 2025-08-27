@@ -10,11 +10,11 @@ public struct CodableProtocol: PeerMacro {
                                  in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         guard let protocolDeclaration = declaration.as(ProtocolDeclSyntax.self) else
         {
-            throw PolymorphicJsonError.codableProtocolNotAppliedOnProtocol
+            throw PolymorphicCodableError.codableProtocolNotAppliedOnProtocol
         }
         guard let arguments = node.arguments else
         {
-            throw PolymorphicJsonError.codableProtocolMissingChildren
+            throw PolymorphicCodableError.codableProtocolMissingChildren
         }
         var types = [String]()
         switch(arguments)
@@ -24,7 +24,7 @@ public struct CodableProtocol: PeerMacro {
                     types.append(String(arg.expression.description.split(separator: ".").first!))
                 }
             default:
-                throw PolymorphicJsonError.wrongArguments
+                throw PolymorphicCodableError.wrongArguments
         }
         
         var cases = ""
@@ -40,7 +40,7 @@ public struct CodableProtocol: PeerMacro {
             """
                case "\(t)":
                     guard let \(t.lowercasingFirstLetter()) = try? \(t)(from: decoder) else {
-                        throw PolymorphicJsonError.couldNotDeserializeSubType("\(t)")
+                        throw PolymorphicCodableError.couldNotDeserializeSubType("\(t)")
                     }
                     self = .\(t.lowercasingFirstLetter())(\(t.lowercasingFirstLetter()))
            """
@@ -50,12 +50,12 @@ public struct CodableProtocol: PeerMacro {
         """
            init (from decoder: Decoder) throws {
               guard let \(generic.lowercasingFirstLetter()) = try? PolymorphicItem(from: decoder) else{
-                  throw PolymorphicJsonError.missingTypeIndicator
+                  throw PolymorphicCodableError.missingTypeIndicator
               }
               switch \(generic.lowercasingFirstLetter()).type {
             \(decoderCases)
                   default:
-                       throw PolymorphicJsonError.unknownType(\(generic.lowercasingFirstLetter()).type)
+                       throw PolymorphicCodableError.unknownType(\(generic.lowercasingFirstLetter()).type)
               }
           }
           """
@@ -74,7 +74,7 @@ public struct CodableProtocol: PeerMacro {
 }
 
 @main
-struct PolymorphicJsonPlugin: CompilerPlugin {
+struct PolymorphicCodablePlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         CodableProtocol.self,
     ]

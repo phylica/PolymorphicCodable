@@ -1,6 +1,6 @@
 //
 //  Extensions.swift
-//  PolymorphicJson
+//  PolymorphicCodable
 //
 //  Created by Pierre Marandon on 27/08/2025.
 //

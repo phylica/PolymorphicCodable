@@ -5,17 +5,17 @@ import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "PolymorphicJson",
+    name: "PolymorphicCodable",
     platforms: [.macOS(.v10_15), .iOS(.v13), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "PolymorphicJson",
-            targets: ["PolymorphicJson"]
+            name: "PolymorphicCodable",
+            targets: ["PolymorphicCodable"]
         ),
         .executable(
-            name: "PolymorphicJsonClient",
-            targets: ["PolymorphicJsonClient"]
+            name: "PolymorphicCodableClient",
+            targets: ["PolymorphicCodableClient"]
         ),
     ],
     dependencies: [
@@ -26,7 +26,7 @@ let package = Package(
         // Targets can depend on other targets in this package and products from dependencies.
         // Macro implementation that performs the source transformation of a macro.
         .macro(
-            name: "PolymorphicJsonMacros",
+            name: "PolymorphicCodableMacros",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
@@ -34,10 +34,10 @@ let package = Package(
         ),
 
         // Library that exposes a macro as part of its API, which is used in client programs.
-        .target(name: "PolymorphicJson", dependencies: ["PolymorphicJsonMacros"]),
+        .target(name: "PolymorphicCodable", dependencies: ["PolymorphicCodableMacros"]),
 
         // A client of the library, which is able to use the macro in its own code.
-        .executableTarget(name: "PolymorphicJsonClient", dependencies: ["PolymorphicJson"]),
+        .executableTarget(name: "PolymorphicCodableClient", dependencies: ["PolymorphicCodable"]),
 
     ]
 )

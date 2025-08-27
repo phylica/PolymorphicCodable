@@ -1,4 +1,4 @@
-import PolymorphicJson
+import PolymorphicCodable
 
 @CodableProtocol(Tree.self, Flower.self)
 protocol Plant: Codable
