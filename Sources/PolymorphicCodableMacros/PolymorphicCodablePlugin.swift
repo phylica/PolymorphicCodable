@@ -8,5 +8,6 @@ struct PolymorphicCodablePlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         CodableProtocol.self,
         CodableField.self,
+        CodableStructure.self,
     ]
 }

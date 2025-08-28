@@ -3,5 +3,6 @@ public enum PolymorphicCodableError: Error {
     case codableProtocolMissingChildren
     case codableFieldNotAppliedOnField
     case codableFieldNotCorrectlyDeclared
+    case codableStructureNotAppliedOnStructure
     case wrongArguments
 }

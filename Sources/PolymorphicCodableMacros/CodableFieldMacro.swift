@@ -14,7 +14,7 @@ public struct CodableField: AccessorMacro, PeerMacro {
         }
         
         guard let variableName = variableDeclaration.bindings.first?.pattern.description,
-              let variableType = variableDeclaration.bindings.first?.typeAnnotation?.type else
+              let variableType = variableDeclaration.bindings.first?.typeAnnotation?.type.description else
         {
             throw PolymorphicCodableError.codableFieldNotCorrectlyDeclared
         }
@@ -24,6 +24,13 @@ public struct CodableField: AccessorMacro, PeerMacro {
           """
             get{
              return \(raw: variableName)PolymorphicEnum.value()
+            }
+            set{
+                do{
+                    \(raw: variableName)PolymorphicEnum = try \(raw: variableType)PolymorphicEnum(newValue)
+                }catch (let error){
+                    fatalError(String(describing: error))
+                }
             }
           """
         ]

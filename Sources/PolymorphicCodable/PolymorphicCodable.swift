@@ -10,3 +10,9 @@ public macro CodableField() = #externalMacro(
     module: "PolymorphicCodableMacros",
     type: "CodableField"
 )
+
+@attached(member, names: named(CodingKeys))
+public macro CodableStructure() = #externalMacro(
+    module: "PolymorphicCodableMacros",
+    type: "CodableStructure"
+)

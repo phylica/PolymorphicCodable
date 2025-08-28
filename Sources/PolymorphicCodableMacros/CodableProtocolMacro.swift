@@ -46,7 +46,7 @@ public struct CodableProtocol: PeerMacro {
            """
         }
         
-        let initializer =
+        let decoderInitializer =
         """
            init (from decoder: Decoder) throws {
               guard let \(generic.lowercasingFirstLetter()) = try? PolymorphicItem(from: decoder) else{
@@ -55,7 +55,7 @@ public struct CodableProtocol: PeerMacro {
               switch \(generic.lowercasingFirstLetter()).type {
             \(decoderCases)
                   default:
-                       throw PolymorphicCodableError.unknownType(\(generic.lowercasingFirstLetter()).type)
+                       throw PolymorphicCodableError.typeNotDeclaredAsSubtype(\(generic.lowercasingFirstLetter()).type)
               }
           }
           """
@@ -78,13 +78,36 @@ public struct CodableProtocol: PeerMacro {
         }
         """
         
+        var initializerCases : String = ""
+        for t in types{
+            initializerCases = initializerCases +
+            """
+               case let \(t.lowercasingFirstLetter()) as \(t):
+                    self = .\(t.lowercasingFirstLetter())(\(t.lowercasingFirstLetter()))
+            """
+        }
+        let valueInitializer =
+        """
+            init(_ \(generic.lowercasingFirstLetter()): \(generic)) throws
+            {
+                switch(\(generic.lowercasingFirstLetter()))
+                {
+                \(initializerCases)
+                    default:
+                        throw PolymorphicCodableError.typeNotDeclaredAsSubtype(String(describing: type(of: \(generic.lowercasingFirstLetter()))))
+                }
+            }  
+        """
+        
         
         return [
           """
           enum \(protocolDeclaration.name)PolymorphicEnum: Codable {
           \(raw: cases)
           
-          \(raw: initializer)
+          \(raw: decoderInitializer)
+          
+          \(raw: valueInitializer)
           
           \(raw: valueGetter)
           }
