@@ -34,8 +34,10 @@ public struct CodableStructure: MemberMacro {
         }
        
         return [
+            "private let polymorphicType = \"\(raw: structureDeclaration.name)\"",
           """
           enum CodingKeys: String, CodingKey {
+              case polymorphicType = "$type"
           \(raw:keys)
           }
           """

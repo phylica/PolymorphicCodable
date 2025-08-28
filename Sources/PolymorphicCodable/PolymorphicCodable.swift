@@ -11,7 +11,7 @@ public macro CodableField() = #externalMacro(
     type: "CodableField"
 )
 
-@attached(member, names: named(CodingKeys))
+@attached(member, names: named(CodingKeys), named(polymorphicType))
 public macro CodableStructure() = #externalMacro(
     module: "PolymorphicCodableMacros",
     type: "CodableStructure"

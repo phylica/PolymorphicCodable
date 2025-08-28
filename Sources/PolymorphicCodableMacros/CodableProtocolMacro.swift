@@ -60,6 +60,24 @@ public struct CodableProtocol: PeerMacro {
           }
           """
         
+        var encoderCases : String = ""
+        for t in types{
+            encoderCases = encoderCases +
+            """
+               case .\(t.lowercasingFirstLetter())(let \(t.lowercasingFirstLetter())):
+                    try \(t.lowercasingFirstLetter()).encode(to: encoder)
+           """
+        }
+        
+        let encoder =
+          """
+          func encode(to encoder: Encoder) throws {
+              switch self {
+              \(encoderCases)
+              }
+          }
+          """
+        
         var valueCases : String = ""
         for t in types{
             valueCases = valueCases +
@@ -106,6 +124,8 @@ public struct CodableProtocol: PeerMacro {
           \(raw: cases)
           
           \(raw: decoderInitializer)
+          
+          \(raw: encoder)
           
           \(raw: valueInitializer)
           

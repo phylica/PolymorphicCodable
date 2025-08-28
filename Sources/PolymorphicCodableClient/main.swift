@@ -7,12 +7,14 @@ protocol Plant: Codable
     var name: String {get set}
 }
 
+@CodableStructure
 struct Tree: Plant
 {
     var name: String
     var height: Int
 }
 
+@CodableStructure
 struct Flower: Plant
 {
     var name: String
@@ -28,7 +30,7 @@ struct Garden: Codable
     @CodableField var plants: [Plant]
 }
 
-var json =
+var originalJson =
 """
 {
  "name": "Babylone",
@@ -54,7 +56,7 @@ var json =
 }
 """
 
-var result = try? JSONDecoder().decode(Garden.self, from: json.data(using: .utf8)!)
+var result = try? JSONDecoder().decode(Garden.self, from: originalJson.data(using: .utf8)!)
 
 assert(result?.name == "Babylone")
 assert(result?.mainPlant.name == "Platane")
@@ -66,3 +68,7 @@ assert((result?.plants.first as? Flower)?.persistence == true)
 
 assert(result?.plants.last?.name == "Érable")
 assert((result?.plants.last as? Tree)?.height == 12)
+
+let reserializedJson = (String(data: try JSONEncoder().encode(result) , encoding: String.Encoding.utf8))
+
+assert(originalJson == reserializedJson)
