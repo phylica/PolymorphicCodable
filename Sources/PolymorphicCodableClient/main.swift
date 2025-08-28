@@ -25,6 +25,7 @@ struct Garden: Codable
 {
     var name: String
     @CodableField var mainPlant: Plant
+    @CodableField var plants: [Plant]
 }
 
 var json =
@@ -58,3 +59,10 @@ var result = try? JSONDecoder().decode(Garden.self, from: json.data(using: .utf8
 assert(result?.name == "Babylone")
 assert(result?.mainPlant.name == "Platane")
 assert((result?.mainPlant as? Tree)?.height == 27)
+
+assert(result?.plants.first?.name == "Tulipe")
+assert((result?.plants.first as? Flower)?.petals == 8)
+assert((result?.plants.first as? Flower)?.persistence == true)
+
+assert(result?.plants.last?.name == "Érable")
+assert((result?.plants.last as? Tree)?.height == 12)
