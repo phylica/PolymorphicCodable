@@ -1,18 +1,19 @@
 @attached(peer, names: suffixed(PolymorphicEnum))
-public macro CodableProtocol(_ children: Any.Type...) = #externalMacro(
+public macro Polymorphic(_ children: Any.Type...) = #externalMacro(
     module: "PolymorphicCodableMacros",
-    type: "CodableProtocol"
+    type: "Polymorphic"
 )
 
 @attached(accessor)
-@attached(peer, names: suffixed(PolymorphicEnum), named(CodingKeys))
-public macro CodableField() = #externalMacro(
+@attached(peer, names: suffixed(PolymorphicEnum))
+public macro Polymorphic() = #externalMacro(
     module: "PolymorphicCodableMacros",
-    type: "CodableField"
+    type: "Polymorphic"
 )
 
+@attached(extension, conformances: Codable)
 @attached(member, names: named(CodingKeys), named(polymorphicType))
-public macro CodableStructure() = #externalMacro(
+public macro Codable() = #externalMacro(
     module: "PolymorphicCodableMacros",
-    type: "CodableStructure"
+    type: "Codable"
 )

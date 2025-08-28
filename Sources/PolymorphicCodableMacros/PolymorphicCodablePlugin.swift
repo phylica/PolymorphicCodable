@@ -6,8 +6,7 @@ import SwiftSyntaxMacros
 @main
 struct PolymorphicCodablePlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        CodableProtocol.self,
-        CodableField.self,
-        CodableStructure.self,
+        Polymorphic.self,
+        Codable.self,
     ]
 }

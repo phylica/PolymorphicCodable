@@ -1,20 +1,20 @@
 import PolymorphicCodable
 import Foundation
 
-@CodableProtocol(Tree.self, Flower.self)
-protocol Plant: Codable
+@Polymorphic(Tree.self, Flower.self)
+protocol Plant
 {
     var name: String {get set}
 }
 
-@CodableStructure
+@Codable
 struct Tree: Plant
 {
     var name: String
     var height: Int
 }
 
-@CodableStructure
+@Codable
 struct Flower: Plant
 {
     var name: String
@@ -22,12 +22,12 @@ struct Flower: Plant
     var persistence: Bool
 }
 
-@CodableStructure
-struct Garden: Codable
+@Codable
+struct Garden
 {
     var name: String
-    @CodableField var mainPlant: Plant
-    @CodableField var plants: [Plant]
+    @Polymorphic var mainPlant: Plant
+    @Polymorphic var plants: [Plant]
 }
 
 var originalJson =
