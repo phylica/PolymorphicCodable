@@ -7,7 +7,7 @@ protocol Plant
     var name: String {get set}
 }
 
-@Codable
+@Codable(codedName: "Baum")
 struct Tree: Plant
 {
     var name: String
@@ -18,7 +18,7 @@ struct Tree: Plant
 struct Flower: Plant
 {
     var name: String
-    var petals: Int
+    @CodedName("pepetatals") var petals: Int
     var persistence: Bool
 }
 
@@ -27,7 +27,7 @@ struct Garden
 {
     var name: String
     @Polymorphic var mainPlant: Plant
-    @Polymorphic var plants: [Plant]
+    @CodedName("pflanzen") @Polymorphic var plants: [Plant]
 }
 
 var originalJson =
@@ -36,19 +36,19 @@ var originalJson =
  "name": "Babylone",
   "mainPlant": 
     {
-      "$type": "Tree",
+      "$type": "Baum",
       "name": "Platane",
       "height": 27
    },
-  "plants": [
+  "pflanzen": [
     {
       "$type": "Flower",
       "name": "Tulipe",
-      "petals": 8,
+      "pepetatals": 8,
       "persistence": true
     },
     {
-      "$type": "Tree",
+      "$type": "Baum",
       "name": "Érable",
       "height": 12
     }

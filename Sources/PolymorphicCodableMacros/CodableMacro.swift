@@ -10,42 +10,20 @@ public struct Codable: MemberMacro, ExtensionMacro {
                                  providingMembersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,
                                  in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax]
     {
-        if let structureDeclaration = declaration.as(StructDeclSyntax.self)
+        guard let structure = declaration.as(StructDeclSyntax.self) else
         {
-            return try structureMembersExpansion(structure: structureDeclaration)
+            throw PolymorphicCodableError.codableAppliedOnIncompatibleThing
         }
         
-        if declaration.is(ProtocolDeclSyntax.self)
+        var codedTypeName: String = structure.name.text
+        if let codedNameArgument = getArguments(fromAttribute: node).first(where: {$0.label == "codedName"})
         {
-            return []
+            guard let stringExpression = codedNameArgument.expression.as(StringLiteralExprSyntax.self) else
+            {
+                throw PolymorphicCodableError.wrongArguments
+            }
+            codedTypeName = stringExpression.representedLiteralValue ?? codedTypeName
         }
-        
-        throw PolymorphicCodableError.codableAppliedOnIncompatibleThing
-    }
-    
-    
-    public static func expansion(of node: SwiftSyntax.AttributeSyntax,
-                                 attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
-                                 providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
-                                 conformingTo protocols: [SwiftSyntax.TypeSyntax],
-                                 in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.ExtensionDeclSyntax]
-    {
-        if let structureDeclaration = declaration.as(StructDeclSyntax.self)
-        {
-            return try structureExtensionsExpansion(structure: structureDeclaration)
-        }
-        
-        if declaration.is(ProtocolDeclSyntax.self)
-        {
-            return []
-        }
-        
-        throw PolymorphicCodableError.codableAppliedOnIncompatibleThing
-    }
-    
-    
-    public static func structureMembersExpansion(structure: StructDeclSyntax) throws -> [SwiftSyntax.DeclSyntax]
-    {
         
         var keys = ""
         for member in structure.memberBlock.members {
@@ -57,28 +35,70 @@ public struct Codable: MemberMacro, ExtensionMacro {
             {
                 throw PolymorphicCodableError.variableNotCorrectlyDeclared
             }
-            
-            let variableAttribute = String(describing: variable.attributes)
-            guard variableAttribute.contains("Polymorphic") else {
-                keys = keys + "case \(variableName)\n"
-                continue
+            var isPolymorphic = false
+            var codedName : String? = nil
+            for attribute in variable.attributes
+            {
+                switch(attribute)
+                {
+                    case .attribute(let attribute):
+                        switch(attribute.attributeName.trimmed.description)
+                        {
+                            case "Polymorphic":
+                                isPolymorphic = true
+                            case "CodedName":
+                                if let codedNameArgument = getArguments(fromAttribute: attribute).first
+                                {
+                                    guard let stringExpression = codedNameArgument.expression.as(StringLiteralExprSyntax.self) else
+                                    {
+                                        throw PolymorphicCodableError.wrongArguments
+                                    }
+                                    codedName = stringExpression.representedLiteralValue
+                                }
+                            default:
+                                ()
+                        }
+                    case .ifConfigDecl(_):
+                        () // Do nothing
+                }
             }
-            keys = keys + "case \(variableName)PolymorphicEnum = \"\(variableName)\"\n"
+            
+            if isPolymorphic{
+                keys = keys + "case \(variableName)PolymorphicEnum = \"\(codedName ?? variableName)\"\n"
+            }else{
+                if let codedName{
+                    keys = keys + "case \(variableName) = \"\(codedName)\"\n"
+                }
+                else{
+                    keys = keys + "case \(variableName)\n"
+                }
+            }
+            
         }
         
         return [
-            "private let polymorphicType = \"\(raw: structure.name)\"",
+            "private let codedName = \"\(raw: codedTypeName)\"",
+            "static let staticCodedName = \"\(raw: codedTypeName)\"",
           """
           enum CodingKeys: String, CodingKey {
-              case polymorphicType = "$type"
+              case codedName = "$type"
           \(raw:keys)
           }
           """
         ]
     }
     
-    public static func structureExtensionsExpansion(structure: StructDeclSyntax) throws -> [SwiftSyntax.ExtensionDeclSyntax]
+    
+    public static func expansion(of node: SwiftSyntax.AttributeSyntax,
+                                 attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
+                                 providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
+                                 conformingTo protocols: [SwiftSyntax.TypeSyntax],
+                                 in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.ExtensionDeclSyntax]
     {
+        guard let structure = declaration.as(StructDeclSyntax.self) else
+        {
+            throw PolymorphicCodableError.codableAppliedOnIncompatibleThing
+        }
         let codableExtension: DeclSyntax =
       """
       extension \(structure.name): Codable {}
@@ -89,5 +109,23 @@ public struct Codable: MemberMacro, ExtensionMacro {
         }
         
         return [extensionDecl]
+    }
+    
+    private static func getArguments(fromAttribute attribute: SwiftSyntax.AttributeSyntax) -> [(
+        label: String,
+        expression: ExprSyntax
+    )]
+    {
+        var result = [(label: String, expression: ExprSyntax)]()
+        switch(attribute.arguments)
+        {
+            case .argumentList(let list):
+                for item in list{
+                    result.append((label: item.label?.description ?? "", expression: item.expression))
+                }
+            default:
+                () // Do nothing.
+        }
+        return result
     }
 }

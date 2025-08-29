@@ -9,11 +9,7 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax,
                                  providingAccessorsOf declaration: some SwiftSyntax.DeclSyntaxProtocol,
                                  in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.AccessorDeclSyntax] {
-        if declaration.is(StructDeclSyntax.self)
-        {
-            return []
-        }
-        
+      
         if declaration.is(ProtocolDeclSyntax.self)
         {
             return []
@@ -30,10 +26,6 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
     public static func expansion(of node: SwiftSyntax.AttributeSyntax,
                                  providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,
                                  in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
-        if declaration.is(StructDeclSyntax.self)
-        {
-            return []
-        }
         
         if let protocolDeclaration = declaration.as(ProtocolDeclSyntax.self)
         {
@@ -187,7 +179,7 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
         for t in types{
             decoderCases = decoderCases +
             """
-               case "\(t)":
+               case \(t).staticCodedName:
                     guard let \(t.lowercasingFirstLetter()) = try? \(t)(from: decoder) else {
                         throw PolymorphicCodableError.couldNotDeserializeSubType("\(t)")
                     }
