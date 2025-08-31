@@ -10,6 +10,9 @@ public struct Codable: MemberMacro, ExtensionMacro {
                                  providingMembersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,
                                  in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax]
     {
+        if declaration.is(EnumDeclSyntax.self){
+            return []
+        }
         guard let structure = declaration.as(StructDeclSyntax.self) else
         {
             throw PolymorphicCodableError.codableAppliedOnIncompatibleThing
@@ -95,13 +98,18 @@ public struct Codable: MemberMacro, ExtensionMacro {
                                  conformingTo protocols: [SwiftSyntax.TypeSyntax],
                                  in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.ExtensionDeclSyntax]
     {
-        guard let structure = declaration.as(StructDeclSyntax.self) else
+        let structure = declaration.as(StructDeclSyntax.self)
+        let enumerated = declaration.as(EnumDeclSyntax.self)
+        guard let name = structure?.name ?? enumerated?.name else
         {
             throw PolymorphicCodableError.codableAppliedOnIncompatibleThing
         }
+        
+        
+        
         let codableExtension: DeclSyntax =
       """
-      extension \(structure.name): Codable {}
+      extension \(name): Codable {}
       """
         
         guard let extensionDecl = codableExtension.as(ExtensionDeclSyntax.self) else {

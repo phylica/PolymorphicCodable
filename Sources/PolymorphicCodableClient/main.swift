@@ -30,6 +30,13 @@ struct Garden
     @CodedName("pflanzen") @Polymorphic var plants: [Plant]
 }
 
+@Codable
+enum TestEnumCase
+{
+    case string(String)
+    case int(Int)
+}
+
 var originalJson =
 """
 {
