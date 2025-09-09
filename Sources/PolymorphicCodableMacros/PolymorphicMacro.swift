@@ -76,12 +76,10 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
              return \(raw: variableName)PolymorphicEnum?.map{$0.value()}
             }
             set{
-                guard let newValue != nil else
-                { return nil }
                 do{
-                    \(raw: variableName)PolymorphicEnum = try newValue.map{ try \(raw:  try getInnerName(variableType))PolymorphicEnum($0)}
+                    \(raw: variableName)PolymorphicEnum = try newValue?.map{ try \(raw:  try getInnerName(variableType))PolymorphicEnum($0)}
                 }catch (let error){
-                    fatalError(String(describing: error))
+                   fatalError(String(describing: error))
                 }
             }
           """
@@ -95,10 +93,8 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
              return \(raw: variableName)PolymorphicEnum?.value()
             }
             set{
-                guard let newValue != nil else 
-                { return nil }
                 do{
-                    \(raw: variableName)PolymorphicEnum = try \(raw:  try getInnerName(variableType))PolymorphicEnum(newValue)
+                    \(raw: variableName)PolymorphicEnum = newValue == nil ? nil : try \(raw:  try getInnerName(variableType))PolymorphicEnum(newValue!)
                 }catch (let error){
                     fatalError(String(describing: error))
                 }
