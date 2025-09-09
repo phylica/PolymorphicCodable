@@ -173,7 +173,7 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
             cases = cases + "case \(t.lowercasingFirstLetter())(\(t))\n"
         }
         
-        let generic : String = protocolDeclaration.name.text
+        let generic : String = protocolDeclaration.name.trimmed.text
         
         var decoderCases : String = ""
         for t in types{
@@ -261,7 +261,7 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
         
         return [
           """
-          enum \(protocolDeclaration.name)PolymorphicEnum: Codable {
+          enum \(raw: protocolDeclaration.name.trimmed.text)PolymorphicEnum: Codable {
           \(raw: cases)
           
           \(raw: decoderInitializer)

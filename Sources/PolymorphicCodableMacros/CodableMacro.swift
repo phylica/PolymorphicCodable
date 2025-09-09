@@ -100,7 +100,7 @@ public struct Codable: MemberMacro, ExtensionMacro {
     {
         let structure = declaration.as(StructDeclSyntax.self)
         let enumerated = declaration.as(EnumDeclSyntax.self)
-        guard let name = structure?.name ?? enumerated?.name else
+        guard let name = structure?.name.trimmed.text ?? enumerated?.name.trimmed.text else
         {
             throw PolymorphicCodableError.codableAppliedOnIncompatibleThing
         }
@@ -109,7 +109,7 @@ public struct Codable: MemberMacro, ExtensionMacro {
         
         let codableExtension: DeclSyntax =
       """
-      extension \(name): Codable {}
+      extension \(raw:name): Codable {}
       """
         
         guard let extensionDecl = codableExtension.as(ExtensionDeclSyntax.self) else {
