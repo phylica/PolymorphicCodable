@@ -12,7 +12,7 @@ public macro Polymorphic() = #externalMacro(
 )
 
 @attached(extension, conformances: Codable)
-@attached(member, names: named(CodingKeys), named(polymorphicType), named(codedName), named(staticCodedName))
+@attached(member, names: named(CodingKeys), named(polymorphicType), named(codedName), named(staticCodedName), named(init))
 public macro Codable(codedName: String? = nil) = #externalMacro(
     module: "PolymorphicCodableMacros",
     type: "Codable"

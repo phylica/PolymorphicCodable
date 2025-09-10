@@ -37,6 +37,12 @@ enum TestEnumCase
     case int(Int)
 }
 
+var initializationTest = Garden(
+    name: "initializationTest",
+    mainPlant: Flower(name: "Pâquerette", petals: 37, persistence: false),
+    plants: []
+)
+
 var originalJson =
 """
 {

@@ -77,7 +77,7 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
             }
             set{
                 do{
-                    \(raw: variableName)PolymorphicEnum = try newValue?.map{ try \(raw:  try getInnerName(variableType))PolymorphicEnum($0)}
+                    \(raw: variableName)PolymorphicEnum = try newValue?.map{ try \(raw: try variableType.innerName)PolymorphicEnum($0)}
                 }catch (let error){
                    fatalError(String(describing: error))
                 }
@@ -94,7 +94,7 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
             }
             set{
                 do{
-                    \(raw: variableName)PolymorphicEnum = newValue == nil ? nil : try \(raw:  try getInnerName(variableType))PolymorphicEnum(newValue!)
+                    \(raw: variableName)PolymorphicEnum = newValue == nil ? nil : try \(raw: try variableType.innerName)PolymorphicEnum(newValue!)
                 }catch (let error){
                     fatalError(String(describing: error))
                 }
@@ -119,7 +119,7 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
             }
             set{
                 do{
-                    \(raw: variableName)PolymorphicEnum = try newValue.map{try \(raw: try getInnerName(variableType))PolymorphicEnum($0)}
+                    \(raw: variableName)PolymorphicEnum = try newValue.map{try \(raw: try variableType.innerName)PolymorphicEnum($0)}
                 }catch (let error){
                     fatalError(String(describing: error))
                 }
@@ -136,7 +136,7 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
             }
             set{
                 do{
-                    \(raw: variableName)PolymorphicEnum = try \(raw: try getInnerName(variableType))PolymorphicEnum(newValue)
+                    \(raw: variableName)PolymorphicEnum = try  \(raw: try variableType.innerName)PolymorphicEnum(newValue)
                 }catch (let error){
                     fatalError(String(describing: error))
                 }
@@ -286,24 +286,6 @@ public struct Polymorphic: AccessorMacro, PeerMacro {
         if let type = type.as(IdentifierTypeSyntax.self)
         {
             return "\(type.name)PolymorphicEnum"
-        }
-        throw PolymorphicCodableError.polymorphicVariableTypeNotManaged
-    }
-    
-    private static func getInnerName(_ type: TypeSyntax) throws -> String{
-        if let type = type.as(OptionalTypeSyntax.self)
-        {
-            let wrappedType = type.wrappedType
-            return try getInnerName(wrappedType)
-        }
-        if let type = type.as(ArrayTypeSyntax.self)
-        {
-            let wrappedType = type.element
-            return try getInnerName(wrappedType)
-        }
-        if let type = type.as(IdentifierTypeSyntax.self)
-        {
-            return type.name.description
         }
         throw PolymorphicCodableError.polymorphicVariableTypeNotManaged
     }

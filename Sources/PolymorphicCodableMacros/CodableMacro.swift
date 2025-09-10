@@ -29,12 +29,15 @@ public struct Codable: MemberMacro, ExtensionMacro {
         }
         
         var keys = ""
+        var initAffectations = ""
+        var initParameters = ""
         for member in structure.memberBlock.members {
             guard let variable = member.decl.as(VariableDeclSyntax.self) else
             {
                 continue
             }
-            guard let variableName = variable.bindings.first?.pattern.description else
+            guard let variableName = variable.bindings.first?.pattern.description,
+                  let variableType = variable.bindings.first?.typeAnnotation?.type.trimmed else
             {
                 throw PolymorphicCodableError.variableNotCorrectlyDeclared
             }
@@ -68,6 +71,36 @@ public struct Codable: MemberMacro, ExtensionMacro {
             
             if isPolymorphic{
                 keys = keys + "case \(variableName)PolymorphicEnum = \"\(codedName ?? variableName)\"\n"
+                
+                if let type = variableType.as(OptionalTypeSyntax.self)
+                {
+                    let wrappedType = type.wrappedType
+                    if wrappedType.is(ArrayTypeSyntax.self)
+                    {
+                        initAffectations = initAffectations + "self.\(variableName)PolymorphicEnum = try \(variableName)?.map{ try \(try variableType.innerName)PolymorphicEnum($0)}\n"
+                    }
+                    else if wrappedType.is(IdentifierTypeSyntax.self)
+                    {
+                        initAffectations = initAffectations + "self.\(variableName)PolymorphicEnum = \(variableName) == nil ? nil : try \(try variableType.innerName)PolymorphicEnum(\(variableName)!)\n"
+                    }
+                    else{
+                        throw PolymorphicCodableError.polymorphicVariableTypeNotManaged
+                    }
+                }
+                else if variableType.is(ArrayTypeSyntax.self)
+                {
+                    initAffectations = initAffectations + "self.\(variableName)PolymorphicEnum = try \(variableName).map{ try  \(try variableType.innerName)PolymorphicEnum($0)}\n"
+                }
+                else if variableType.is(IdentifierTypeSyntax.self)
+                {
+                    initAffectations = initAffectations + "self.\(variableName)PolymorphicEnum = try \(try variableType.innerName)PolymorphicEnum(\(variableName))\n"
+                }
+                else
+                {
+                    throw PolymorphicCodableError.polymorphicVariableTypeNotManaged
+                }
+                
+                
             }else{
                 if let codedName{
                     keys = keys + "case \(variableName) = \"\(codedName)\"\n"
@@ -75,6 +108,12 @@ public struct Codable: MemberMacro, ExtensionMacro {
                 else{
                     keys = keys + "case \(variableName)\n"
                 }
+                initAffectations = initAffectations + "self.\(variableName) = \(variableName)\n"
+            }
+            if variableType.is(OptionalTypeSyntax.self) {
+                initParameters  = initParameters + "\(variableName): \(variableType) = nil,"
+            }else{
+                initParameters  = initParameters + "\(variableName): \(variableType),"
             }
             
         }
@@ -87,7 +126,16 @@ public struct Codable: MemberMacro, ExtensionMacro {
               case codedName = "$type"
           \(raw:keys)
           }
-          """
+          """,
+            """
+       init(\(raw: initParameters)) {
+      do{
+        \(raw: initAffectations)
+      }catch(let error){
+        fatalError(error.localizedDescription)
+      }
+      }
+      """
         ]
     }
     
